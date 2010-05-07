@@ -145,7 +145,7 @@ class Bugzilla
   end
 
   # Post a new bug to Bugzilla
-  def post(summary, description, assignee, product="", component="")
+  def post(summary, description, assignee, product="TestProduct", component="")
     @log.debug "Attempting to file a new bug"
     url = "#{@url}/enter_bug.cgi?product=#{product}&assigned_to=#{assignee}&component=#{component}"
     @log.debug url
@@ -156,6 +156,7 @@ class Bugzilla
       form['short_desc']=summary
       form['comment']=description
       form['assignee']=assignee
+      form['component']=component if not component.empty?
       page = @agent.submit form if not @dummy
       @log.info page.search(".//td[@id='title']")[0].content.strip
       # Read the bug number from the page

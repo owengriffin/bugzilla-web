@@ -36,3 +36,37 @@ Then /^the new bug is assigned to "([^\"]*)"$/ do |arg1|
   end
   fail "Unable to find bug #{$bug_id} in assignee list" if not found
 end
+
+Given /^I post a bug assigned to "([^\"]*)" for the "([^\"]*)" product$/ do |arg1, arg2|
+  $bug_id = $bugzilla.post("summary", "description", arg1, arg2)
+end
+
+When /^I count the number of bugs for the "([^\"]*)" product$/ do |arg1|
+  $product = arg1
+  $count = $bugzilla.count('', arg1)
+end
+
+Then /^the product count has incremented$/ do
+  fail "The count has not incremented" if $bugzilla.count('', $product) != $count + 1
+end
+
+When /^I count the number of bugs for the "([^\"]*)" product and "([^\"]*)" component$/ do |arg1, arg2|
+  $countmap = {} if not defined? $countmap
+  $countmap[arg1 + '_' + arg2] = $bugzilla.count('', arg1, arg2)
+end
+
+When /^I post a bug assigned to "([^\"]*)" for the "([^\"]*)" product and "([^\"]*)" compontent$/ do |arg1, arg2, arg3|
+  $bug_id = $bugzilla.post("summary", "description", arg1, arg2, arg3)
+end
+
+Then /^the count for product "([^\"]*)" and component "([^\"]*)" has incremented$/ do |arg1, arg2|
+  count = $bugzilla.count('',arg1, arg2)
+  fail "The count has not incremented" if $countmap[arg1 + "_" + arg2] + 1 != count
+end
+
+Then /^the count for product "([^\"]*)" and component "([^\"]*)" has not incremented$/ do |arg1, arg2|
+  fail "The count has changed" if $countmap[arg1 + "_" + arg2] == $bugzilla.count('',arg1, arg2)
+end
+
+
+
