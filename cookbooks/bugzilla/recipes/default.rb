@@ -19,7 +19,7 @@ template "/usr/local/share/bugzilla-3.4.6/localconfig" do
   source "localconfig.erb"
   owner "root"
   group "root"
-  mode "0600"
+  mode "0655"
   variables(
     :bugzilla => node[:bugzilla]
   )
@@ -38,12 +38,50 @@ execute "create #{node[:bugzilla][:db][:database]} database" do
   end
 end
 
-execute "create mysql user" do
-  command "echo \"create user #{node[:bugzilla][:db][:user]}\" | /usr/bin/mysql -u root -p#{node[:mysql][:server_root_password]}"
+execute "create mysql user #{@node[:bugzilla][:db][:user]}" do
+  command "echo \"create user #{node[:bugzilla][:db][:user]}; SET PASSWORD FOR '#{node[:bugzilla][:db][:user]}'@'%' = PASSWORD('<%= @node[:bugzilla][:db][:password] %>');\" | /usr/bin/mysql -u root -p#{node[:mysql][:server_root_password]}"
   not_if do
     m = Mysql.new("localhost", "root", @node[:mysql][:server_root_password])
     st = m.prepare("select User from mysql.user")
     st.execute
     st.fetch.include?(@node[:bugzilla][:db][:user])
   end
+end
+
+require_recipe "perl"
+
+package "ucf"
+package "libtemplate-perl"
+package "libappconfig-perl"
+package "libtimedate-perl"
+package "libemail-send-perl"
+package "libmail-sendmail-perl"
+package "libemail-mime-perl"
+package "libemail-mime-modifier-perl"
+package "libemail-mime-perl"
+#package "libemail-mime-creator-perl"
+#package "libcgi-pm-perl"
+package "libdbd-mysql-perl"
+#package "libdbd-pg-perl"
+#package "mail-transport-agent"
+package "ucf"
+package "patch"
+package "dbconfig-common"
+
+script "install-modules" do
+  interpreter "bash"
+  user "root"
+  cwd "/usr/local/share/bugzilla-3.4.6/"
+  code <<-EOH
+  /usr/bin/perl install-module.pl CGI
+  /usr/bin/perl install-module.pl Digest::SHA
+  /usr/bin/perl install-module.pl DateTime
+  /usr/bin/perl install-module.pl DateTime::TimeZone
+  /usr/bin/perl install-module.pl Template
+  /usr/bin/perl install-module.pl Email::MIME::Encodings
+  EOH
+end
+
+execute "check-setup" do
+  command "cd /usr/local/share/bugzilla-3.4.6/ ; perl checksetup.pl"
 end
