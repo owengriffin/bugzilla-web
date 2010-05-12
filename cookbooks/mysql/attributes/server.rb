@@ -18,10 +18,23 @@
 #
 
 ::Chef::Node.send(:include, Opscode::OpenSSL::Password)
+if File.exists? "/vagrant/mysql.password"
+  secure_password = File.open("/vagrant/mysql.password", "r").gets.strip
+  set[:mysql][:server_debian_password] = secure_password
+  set[:mysql][:server_root_password] = secure_password
+  set[:mysql][:server_repl_password] = secure_password
+else
+  chars = ("a".."z").to_a + ("A".."Z").to_a + ("0".."9").to_a
+  secure_password = ""
+  20.times { |i| secure_password << chars[rand(chars.size-1)] }
+  set[:mysql][:server_debian_password] = secure_password
+  set[:mysql][:server_root_password] = secure_password
+  set[:mysql][:server_repl_password] = secure_password
+  File.open("/vagrant/mysql.password", "w") do |f|
+    f.puts secure_password
+  end
+end
 
-set_unless[:mysql][:server_debian_password] = secure_password
-set_unless[:mysql][:server_root_password] = secure_password
-set_unless[:mysql][:server_repl_password] = secure_password
 set_unless[:mysql][:bind_address]         = ipaddress
 set_unless[:mysql][:datadir]              = "/var/lib/mysql"
 
