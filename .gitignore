@@ -3,3 +3,4 @@ bugzilla-web.gemspec
 pkg
 *.tar.gz
 *.password
+.vagrant
