@@ -61,12 +61,13 @@ script "install-modules" do
   cwd "/usr/local/share/bugzilla-3.4.6/"
   code <<-EOH
   cd /usr/local/share/bugzilla-3.4.6/
-  /usr/bin/perl install-module.pl CGI
-  /usr/bin/perl install-module.pl Digest::SHA
-  /usr/bin/perl install-module.pl DateTime
-  /usr/bin/perl install-module.pl DateTime::TimeZone
-  /usr/bin/perl install-module.pl Template
-  /usr/bin/perl install-module.pl Email::MIME::Encodings
+/usr/bin/perl install-module.pl CGI
+/usr/bin/perl install-module.pl Digest::SHA
+/usr/bin/perl install-module.pl DateTime
+/usr/bin/perl install-module.pl DateTime::TimeZone
+/usr/bin/perl install-module.pl DateTime::Locale
+/usr/bin/perl install-module.pl Template
+/usr/bin/perl install-module.pl Email::MIME::Encodings
   touch /usr/local/share/bugzilla-3.4.6/install-modules-complete
   EOH
   not_if do
